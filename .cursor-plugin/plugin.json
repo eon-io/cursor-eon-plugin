@@ -1,0 +1,40 @@
+{
+  "name": "eon",
+  "displayName": "Eon",
+  "version": "0.1.0",
+  "description": "Eon MCP server — exposes the Eon AI agent tools and skills for multi-cloud backup, recovery, inventory, and onboarding.",
+  "author": {
+    "name": "Eon",
+    "url": "https://eon.io"
+  },
+  "publisher": "Eon",
+  "homepage": "https://eon.io",
+  "license": "Proprietary",
+  "logo": "assets/logo.png",
+  "keywords": [
+    "eon",
+    "mcp",
+    "cloud-backup",
+    "cloud-recovery",
+    "multi-cloud",
+    "aws",
+    "azure",
+    "gcp",
+    "onboarding",
+    "inventory",
+    "snapshots",
+    "restore",
+    "backup-policy",
+    "discovery"
+  ],
+  "category": "cloud-infrastructure",
+  "tags": [
+    "mcp",
+    "gcp",
+    "backup",
+    "recovery",
+    "onboarding"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "mcp.json"
+}
