@@ -1,0 +1,21 @@
+{
+  "name": "eon-io",
+  "owner": {
+    "name": "Eon",
+    "url": "https://eon.io"
+  },
+  "metadata": {
+    "description": "Eon plugin marketplace — MCP server and skills for multi-cloud backup, recovery, and inventory management."
+  },
+  "plugins": [
+    {
+      "name": "eon",
+      "description": "Eon MCP server — exposes the Eon AI agent tools and skills for multi-cloud backup, recovery, inventory, and onboarding.",
+      "source": {
+        "source": "github",
+        "repo": "eon-io/cursor-eon-plugin"
+      },
+      "homepage": "https://eon.io"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "eon": {
+      "type": "http",
+      "url": "https://mcp.eon.io/mcp"
+    }
+  }
+}
