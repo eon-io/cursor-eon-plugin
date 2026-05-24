@@ -1,0 +1,35 @@
+Eon Plugin for Claude
+Copyright 2026 Eon io Ltd
+
+This product includes software developed by Eon io Ltd
+(https://eon.io).
+
+Licensed under the Apache License, Version 2.0 (the "License").
+A copy of the License is included in the LICENSE file distributed
+with this work and is also available at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+----------------------------------------------------------------------
+NOTE ON ACCESS TO THE EON SERVICE
+
+The Apache 2.0 License governs the source code in this repository
+only. It does not grant any right to access or use the Eon service,
+the Eon API, or any Eon-hosted data.
+
+Use of the Eon service and the Eon API requires a valid Eon account
+and is governed by the Eon Terms of Service and any applicable Data
+Processing Agreement, available at https://eon.io. The Eon name, the
+Eon logo, and other Eon trademarks are not licensed under the Apache
+License and remain the property of Eon io Ltd; see Section 6 of the
+Apache License 2.0.
+
+----------------------------------------------------------------------
+THIRD-PARTY NOTICES
+
+This product may include third-party software components. Attribution
+notices required by those components, if any, are listed below. If you
+add or remove a third-party dependency, update this section to keep
+attributions accurate.
+
+(No third-party notices at this time.)
