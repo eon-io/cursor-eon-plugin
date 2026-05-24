@@ -5,7 +5,9 @@ Connect Cursor to Eon via this plugin. Bundles the Eon MCP server and guided clo
 ## Capabilities
 
 - **Eon MCP server** — 27 tools for multi-cloud backup, recovery, inventory, source account management, backup policies, snapshot browsing, restore jobs, GCP organization/folder onboarding, and resource discovery.
+- **AWS onboarding skill** — step-by-step guided workflow to connect AWS source accounts via the Eon CloudFormation template.
 - **GCP onboarding skill** — step-by-step guided workflow to connect GCP organizations, folders, and individual projects to Eon.
+- **Backup policy creation skill** — guided wizard to create backup policies (STANDARD, HIGH_FREQUENCY, PITR, AWS_NATIVE_PITR) with resource selectors, vault schedules, and retention.
 
 ## Installation
 
@@ -20,7 +22,9 @@ cp -R . ~/.cursor/plugins/local/eon
 
 | Skill | Description |
 |-------|-------------|
+| AWS Onboarding | Guide users through connecting AWS source accounts: deploy the Eon CloudFormation stack, register the IAM role ARN, and run discovery. |
 | GCP Onboarding | Guide users through connecting GCP cloud accounts (orgs, folders, or individual projects) to the Eon platform. |
+| Backup Policy Creation | Guide users through creating backup policies: pick a type, define the resource selector, configure schedules with vaults and retention. |
 
 ## MCP Server
 
