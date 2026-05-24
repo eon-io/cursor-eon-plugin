@@ -38,3 +38,7 @@ Copy the plugin to Cursor's local plugin directory, then run `/reload-plugins` i
 
 - [Eon Platform](https://eon.io)
 - [Documentation](https://docs.eon.io)
+
+## License
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE) for details. Use of the Eon service and API is governed separately by the Eon Terms of Service.

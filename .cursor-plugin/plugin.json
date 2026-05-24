@@ -9,7 +9,7 @@
   },
   "publisher": "Eon",
   "homepage": "https://eon.io",
-  "license": "Proprietary",
+  "license": "Apache-2.0",
   "logo": "assets/logo.png",
   "keywords": [
     "eon",
