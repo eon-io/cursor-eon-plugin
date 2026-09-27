@@ -101,21 +101,19 @@ fundamentally different things from the same hourly raw data:
 
 | `usageUnit` | What `usage.amount` means | Use it for |
 |---|---|---|
-| `"BYTE_MONTHS"` (default) | **Time-weighted consumption.** Raw hourly bytes are divided by hours-in-month (~730) to produce a pro-rated GB-month value; those are summed across the queried period. | "How much storage did Department A consume in Q1?" — the kind of question billing answers. |
+| `"BYTE_MONTHS"` (default) | **Time-weighted consumption.** Raw hourly bytes are divided by the fixed monthly-hour basis (730 from June 1, 2025; 720 before that) to produce a pro-rated GB-month value; those are summed across the queried period. | "How much storage did Department A consume in Q1?" — the kind of question billing answers. |
 | `"BYTES"` | **Average size over the period.** Raw hourly byte values are summed and then divided by the hour-count to produce a true average footprint. | "What's the average size of my backups over the last month?" — typical-footprint questions, **not** consumption questions. |
 
-**Worked example** — same resource (100 GB EC2 backup, stored for all of
-March):
+**Worked example** — 100 decimal GB stored throughout March 2026
+(744 metered hours), with an illustrative effective rate of 4 credits/GB-month:
 
-- With `"BYTE_MONTHS"`: `usage.amount = 107_374_182_400` → ÷ `2^30` = 100
-  GiB-months. Cost = 400 credits = $4.00.
-- With `"BYTES"`: `usage.amount = 107_374_182_400` → ÷ `2^30` = 100 GiB
-  average size.
+- `BYTE_MONTHS`: `100_000_000_000 × 744 / 730` bytes-month,
+  approximately 101.918 GB-month; cost approximately 407.671 credits.
+- `BYTES`: 100,000,000,000 bytes, or 100 GB average footprint.
 
-If the resource only existed for half the month, `BYTE_MONTHS` would
-return ~50 GiB-months (half the consumption) while `BYTES` would still
-return ~100 GiB (the average size while it was there). When in doubt,
-use `BYTE_MONTHS` — it matches what the customer is billed on.
+For only 372 recorded hours at the same size, consumption is approximately
+50.959 GB-month. The average over those recorded samples remains 100 GB;
+it is not an average that fills every missing hour with zero.
 
 ### Three sizes — don't confuse them
 
@@ -138,31 +136,96 @@ Use decimal unless the user explicitly asks for GiB / binary.
 
 The Eon billing system uses **credits**, not raw cloud-provider dollars.
 
-- **Unit conversion**: `1 credit = $0.01 USD` (so 100 credits = $1).
+- **Display conversion**: Cost Explorer displays `1 credit = $0.01 USD`.
+  This is not necessarily the effective purchase price of historical credits
+  granted with bonus credits. It is not an invoice or cash-revenue calculation.
+- **Effective pricing**: metering applies the applicable effective-dated tenant
+  dimension rate or default, including the relevant regional pricing. Do not
+  apply a quoted discount again to already-priced consumption. Do not assume
+  a list-price example is the customer's negotiated rate.
 - **Cost rows**: when `costUnit = "CREDITS"`, `cost.amount` is in credits;
   when `costUnit = "USD"`, it's already dollars. The conversion is done
   server-side — you don't multiply yourself.
 - **Per-hour formula** (per resource, computed hourly):
   ```
-  credits/hour = rate × backupStorageGB / hoursInMonth
+  credits/hour = rate × backupStorageGB / hours_constant
   ```
   where:
   - `rate` = credits per GB-month, varies by resource type and vault
     cloud/region (e.g. EC2 backed up to an AWS vault ≈ 4 credits/GB-mo).
   - `backupStorageGB` = total GB currently stored in the vault for this
     resource at the sample time.
-  - `hoursInMonth` ≈ 730 (the exact value is per-month — the server uses
-    the actual hours in the calendar month being billed).
+  - `hours_constant` = 730 for metering timestamps on or after
+    2025-06-01T00:00:00Z, and 720 before that. It does not vary with
+    calendar-month length.
+  - `backupStorageGB` uses decimal GB: bytes / 1,000,000,000.
+    If the stored rate is in milli-credits, divide it by 1,000 first.
 
-So a 100 GiB EC2 backup in an AWS vault at the 4 credits/GB-mo rate
-accrues `4 × 100 / 730 = 0.548 credits/hour`, which over a 730-hour month
+So a 100 decimal GB EC2 backup in an AWS vault at the 4 credits/GB-mo rate
+accrues `4 × 100 / 730 = 0.548 credits/hour`, which over 730 metered hours
 sums to 400 credits = $4.00.
 
-If the customer asks "why is my bill X?", you can:
+To explain metered consumption (not the final invoice), you can:
 1. Run a per-resource query (`groupBy = "RESOURCE"`) over the period.
 2. Show `usage.amount` (consumption in GB-month) and `cost.amount` per
    resource.
 3. Explain the rate × consumption math using the formula above.
+
+### Consumption is not an invoice or remaining balance
+
+`query_cost_data` reports metered consumption. Billing separately allocates
+that usage against eligible ESMP, refund credits and ordinary agreement
+credits, then handles uncovered usage. A matching time window alone cannot
+reconstruct that allocation or a marketplace charge.
+
+For remaining-credit, agreement, ESMP or transaction questions, direct the
+customer to the Console credit/transaction views. Those use separate
+agreement and transaction/preview APIs. Do not invent a balance, charge or
+invoice from Cost Explorer totals; preview is not a committed charge.
+
+### Which accounts does the query include?
+
+The API uses the caller's authorized Eon tenant scope. One business customer
+can have several Eon tenants; a query for one tenant does not automatically
+include the others.
+
+Within that scope, `groupBy: "SOURCE_ACCOUNT"` breaks consumption down by
+source cloud account, such as an AWS account, Azure subscription or GCP
+project. It does not group by Eon tenant or Salesforce customer Account.
+State the scope in the answer, especially when the user asks for a
+"customer total" or "all accounts".
+
+### What can be added together?
+
+Each record can contain several `costs[]` entries. Each entry identifies a
+metering dimension and contains two different measurements:
+
+- **`cost.amount`**: the consumption value in the returned `cost.unit`
+  (credits or USD). For a total, add all applicable entries across all
+  response pages, using the same unit and requested scope/time range.
+- **`usage.amount`**: the measured quantity in `usage.unit`. Interpret it
+  together with `meteringDimension`; different usage categories cannot be
+  combined into a meaningful single quantity.
+
+For example, storage consuming **100 GB-month and 400 credits**, plus transfer
+consuming **20 GB and 50 credits**, totals **450 credits**. Report the usage as
+**100 GB-month of storage and 20 GB of transfer**, not "120 GB of usage".
+These numbers are illustrative, not a rate card.
+
+Keep managed objects, operations and seats separate from storage and transfer.
+Even matching units do not always make quantities additive over time: average
+storage sizes and point-in-time seat counts must not be summed across days.
+The storage pricing formula applies only to storage; other dimensions have
+their own calculations.
+
+### Which products does this guide cover?
+
+The request examples in this guide primarily cover cloud backup. For SaaS
+backup or Storage Gateway questions, first check whether the available tool
+schema supports the requested product and its filters. Then interpret the
+returned product-specific units. If that coverage cannot be established,
+explain the limitation instead of presenting a cloud-backup result as total
+consumption across all products.
 
 ### Billing period vs calendar month
 
@@ -172,8 +235,8 @@ next** (e.g. March's billing period = `2026-02-26T00:00:00Z` to
 
 When a customer says "this month's bill" or "last billing period":
 - If they're asking about the **calendar month**, use Jan 1 – Feb 1, etc.
-- If they're asking about the **invoiced amount**, use the 26th-to-26th
-  window.
+- For a **billing-cycle consumption comparison**, use the 26th-to-26th
+  window. That query still does not establish the invoiced amount.
 
 These will produce different numbers — sometimes meaningfully different,
 since the back-half of one calendar month and the front-half of the next
