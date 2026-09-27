@@ -130,10 +130,22 @@ For **cost** questions: send `"costUnit": "USD"` and sum
 `records[].costs[].cost.amount`.
 
 For **credits**: send `"costUnit": "CREDITS"` (the default). Conversion is
-`1 credit = $0.01 USD` — i.e. 100 credits = $1. See
+`1 credit = $0.01 USD` is the API's display conversion, not necessarily
+historical purchase price or an invoiced charge. Metered credits already
+reflect applicable rates; do not apply negotiated discounts again. See
 [references/api-details.md](references/api-details.md#eon-credits-and-billing-math)
 for the per-hour pricing formula if the customer wants to understand how
-their bill is computed.
+their storage consumption is computed.
+
+## Billing boundaries
+
+This skill explains metered consumption, not remaining agreement credits or
+final invoices. ESMP, refund credits, ordinary-credit allocation and uncovered
+usage require separate billing records. Refer balance and transaction
+questions to the Console credit views; do not derive them from consumption.
+Keep usage categories separate by returned units, and include all applicable
+`costs[]` entries and pages when summing costs. Tenant scope is not the same
+as the customer's Salesforce Account or all its tenants.
 
 ## Critical gotchas (the rest are in references/api-details.md)
 
@@ -165,6 +177,7 @@ ground-truth audit log of create/delete events.**
 
 **"What does an individual resource cost right now?"** —
 `query_cost_data` returns cost history, not real-time pricing. For
-point-in-time pricing questions, defer to the cloud provider's pricing
-pages, or explain the Eon credit rate for the relevant resource type
+point-in-time pricing questions, explain that provider list prices do not establish the customer's Eon
+rate; use a verified effective Eon rate if available, or refer to their
+commercial terms. For the storage formula
 (see [references/api-details.md](references/api-details.md#eon-credits-and-billing-math)).
